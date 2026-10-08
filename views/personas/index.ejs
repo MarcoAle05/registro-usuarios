@@ -1,0 +1,35 @@
+<%- include('../plantillas/header') %>
+  <h1>Personas registradas</h1>
+  <p><a class="btn btn-primary" href="/personas/crear">Nueva persona</a></p>
+
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr><th>ID</th><th>Nombre</th><th>Apellido</th><th>Email</th><th>Edad</th><th>Ventas</th><th>Registrado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        <% personas.forEach(p => { %>
+          <tr>
+            <td><%= p.id %></td>
+            <td><%= p.nombre %></td>
+            <td><%= p.apellido %></td>
+            <td><%= p.email %></td>
+            <td><%= p.edad %></td>
+            <td><%= p.venta.length %></td>
+            <td><%= new Date(p.createdAt).toLocaleString('es-MX') %></td>
+            <td>
+              <a class="btn btn-sm btn-warning" href="/personas/<%= p.id %>/editar">Editar</a>
+              <form class="d-inline" action="/personas/<%= p.id %>?_method=DELETE" method="POST"
+                    onsubmit="return confirm('¿Eliminar a <%= p.nombre %> <%= p.apellido %>?')">
+                <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (personas.length === 0) { %>
+          <tr><td colspan="8">No hay personas registradas</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+<%- include('../plantillas/footer') %>

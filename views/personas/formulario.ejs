@@ -1,0 +1,29 @@
+<%- include('../plantillas/header') %>
+<h1><%= persona ? 'Editar' : 'Nueva' %> Persona</h1>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger"><%= error %></div>
+<% } %>
+
+<form class="text-start mx-auto" style="max-width: 480px" action="<%= action %>" method="<%= method %>">
+  <label class="form-label" for="nombre">Nombre:</label>
+  <input class="form-control mb-2" id="nombre" type="text" name="nombre" value="<%= valores.nombre || '' %>" required>
+
+  <label class="form-label" for="apellido">Apellido:</label>
+  <input class="form-control mb-2" id="apellido" type="text" name="apellido" value="<%= valores.apellido || '' %>" required>
+
+  <label class="form-label" for="email">Email:</label>
+  <input class="form-control mb-2" id="email" type="email" name="email" value="<%= valores.email || '' %>" required>
+
+  <label class="form-label" for="edad">Edad:</label>
+  <input class="form-control mb-2" id="edad" type="number" name="edad" min="0" max="120" value="<%= valores.edad ?? '' %>" required>
+
+  <label class="form-label" for="password">Contraseña:</label>
+  <input class="form-control mb-1" id="password" type="password" name="password" minlength="6" <%= persona ? '' : 'required' %>>
+  <% if (persona) { %><div class="form-text mb-2">Déjala vacía para conservar la actual.</div><% } %>
+
+  <button class="btn btn-primary mt-2" type="submit">Guardar</button>
+  <a class="btn btn-secondary mt-2" href="/personas">Cancelar</a>
+</form>
+
+<%- include('../plantillas/footer') %>

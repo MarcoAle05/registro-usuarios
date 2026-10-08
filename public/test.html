@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prueba API</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 16px; }
+    label { display: block; margin-top: 10px; }
+    input { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; }
+    button { padding: 12px; font-size: 16px; margin: 10px 6px 0 0; }
+    pre { background: #f2f2f2; padding: 10px; white-space: pre-wrap; word-break: break-word; }
+  </style>
+</head>
+<body>
+  <h1>Prueba API</h1>
+  <label>Nombre <input id="nombre" value="Ana"></label>
+  <label>Email <input id="email" type="email" value="ana@example.com"></label>
+  <label>Password <input id="password" value="123456"></label>
+
+  <button onclick="enviar('/api/registro', true)">Registro</button>
+  <button onclick="enviar('/api/login', false)">Login</button>
+  <button onclick="lista()">Lista</button>
+
+  <pre id="salida">Resultado...</pre>
+
+  <script>
+    const salida = document.getElementById('salida');
+    const valor = (id) => document.getElementById(id).value;
+
+    async function mostrar(promesa) {
+      try {
+        const res = await promesa;
+        const texto = await res.text();
+        let cuerpo = texto;
+        try { cuerpo = JSON.stringify(JSON.parse(texto), null, 2); } catch {}
+        salida.textContent = `HTTP ${res.status}\n${cuerpo}`;
+      } catch (e) {
+        salida.textContent = 'Error de red: ' + e.message;
+      }
+    }
+
+    function enviar(ruta, conNombre) {
+      const datos = { email: valor('email'), password: valor('password') };
+      if (conNombre) datos.nombre = valor('nombre');
+      mostrar(fetch(ruta, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos),
+      }));
+    }
+
+    function lista() {
+      mostrar(fetch('/api/lista'));
+    }
+  </script>
+</body>
+</html>

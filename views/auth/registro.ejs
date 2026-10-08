@@ -1,0 +1,20 @@
+<%- include('../plantillas/header') %>
+  <h1>Crear cuenta</h1>
+
+  <% if (error) { %>
+    <div class="alert alert-danger"><%= error %>
+      <% if (yaRegistrado) { %> — <a href="/login">Inicia sesión aquí</a><% } %>
+    </div>
+  <% } %>
+
+  <form class="text-start mx-auto" style="max-width: 480px" action="/registro" method="POST">
+    <input class="form-control mb-2" type="text"   name="nombre"   placeholder="Nombre"   required value="<%= valores.nombre || '' %>">
+    <input class="form-control mb-2" type="text"   name="apellido" placeholder="Apellido" required value="<%= valores.apellido || '' %>">
+    <input class="form-control mb-2" type="email"  name="email"    placeholder="Email"    required value="<%= valores.email || '' %>">
+    <input class="form-control mb-2" type="number" name="edad"     placeholder="Edad"     required min="0" max="120" value="<%= valores.edad || '' %>">
+    <input class="form-control mb-2" type="password" name="password" placeholder="Contraseña (mín. 6 caracteres)" required minlength="6">
+    <button class="btn btn-primary w-100" type="submit">Registrarme</button>
+  </form>
+
+  <p class="mt-3">¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></p>
+<%- include('../plantillas/footer') %>
