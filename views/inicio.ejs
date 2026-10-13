@@ -1,0 +1,42 @@
+<%- include('plantillas/header', { titulo: 'Libros' }) %>
+<div class="encabezado entra">
+  <div>
+    <h1>Libros disponibles</h1>
+    <p class="texto-suave"><%= libros.length %> <%= libros.length === 1 ? 'título en el catálogo' : 'títulos en el catálogo' %></p>
+  </div>
+  <% if (carritoCantidad > 0) { %>
+    <a class="btn btn-primary" href="/carrito">Ver carrito (<%= carritoCantidad %>)</a>
+  <% } %>
+</div>
+
+<% if (libros.length === 0) { %>
+  <div class="vacio"><p><strong>Aún no hay libros en el catálogo</strong></p></div>
+<% } else { %>
+  <ul class="catalogo entra entra--2">
+    <% libros.forEach((l) => { const cuantos = enCarrito[l.id] || 0; %>
+      <li class="libro">
+        <% if (l.imagen) { %>
+          <img class="libro__portada" src="<%= l.imagen %>" alt="Portada de <%= l.titulo %>" loading="lazy">
+        <% } else { %>
+          <div class="libro__portada libro__portada--vacia" aria-hidden="true"><%= l.titulo %></div>
+        <% } %>
+        <h2 class="libro__titulo"><%= l.titulo %></h2>
+        <p class="libro__autor"><%= l.autor %></p>
+        <p class="libro__precio"><%= dinero(l.precio) %></p>
+        <% if (cuantos >= maxPorLibro) { %>
+          <p class="libro__estado">Máximo en tu carrito (<%= cuantos %>)</p>
+        <% } else { %>
+          <form action="/carrito/agregar" method="POST" data-enviando>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="libroId" value="<%= l.id %>">
+            <button class="btn btn-outline-primary w-100" type="submit">
+              Agregar<span class="visually-hidden"> «<%= l.titulo %>» al carrito</span>
+            </button>
+          </form>
+          <% if (cuantos > 0) { %><p class="libro__estado">En tu carrito: <%= cuantos %></p><% } %>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+<%- include('plantillas/footer') %>

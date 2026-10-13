@@ -1,29 +1,61 @@
-<%- include('../plantillas/header') %>
-<h1><%= persona ? 'Editar' : 'Nueva' %> Persona</h1>
+<%- include('../plantillas/header', { titulo: persona ? 'Editar persona' : 'Nueva persona', ancho: 'medio' }) %>
+<h1><%= persona ? 'Editar persona' : 'Nueva persona' %></h1>
+<p class="texto-suave mb-4"><%= persona ? 'Modifica los datos y guarda los cambios.' : 'Completa los datos para registrar a la persona.' %></p>
 
 <% if (typeof error !== 'undefined' && error) { %>
-  <div class="alert alert-danger"><%= error %></div>
+  <div class="alert alert-danger" role="alert" tabindex="-1" data-enfocar><%= error %></div>
 <% } %>
 
-<form class="text-start mx-auto" style="max-width: 480px" action="<%= action %>" method="<%= method %>">
-  <label class="form-label" for="nombre">Nombre:</label>
-  <input class="form-control mb-2" id="nombre" type="text" name="nombre" value="<%= valores.nombre || '' %>" required>
+<form action="<%= action %>" method="<%= method %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-  <label class="form-label" for="apellido">Apellido:</label>
-  <input class="form-control mb-2" id="apellido" type="text" name="apellido" value="<%= valores.apellido || '' %>" required>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label" for="nombre">Nombre</label>
+      <input class="form-control" id="nombre" type="text" name="nombre" required value="<%= valores.nombre || '' %>">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="apellido">Apellido</label>
+      <input class="form-control" id="apellido" type="text" name="apellido" required value="<%= valores.apellido || '' %>">
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="email">Correo electrónico</label>
+      <input class="form-control" id="email" type="email" name="email" autocomplete="off" required value="<%= valores.email || '' %>">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="edad">Edad</label>
+      <input class="form-control" id="edad" type="number" name="edad" min="0" max="120" inputmode="numeric" required value="<%= valores.edad ?? '' %>">
+    </div>
+    <% if (sesion.rol === 'admin') { %>
+      <div class="col-md-8">
+        <label class="form-label" for="rol">Rol</label>
+        <select class="form-select" id="rol" name="rol" aria-describedby="ayuda-rol">
+          <option value="usuario" <%= (valores.rol || 'usuario') === 'usuario' ? 'selected' : '' %>>Usuario</option>
+          <option value="admin" <%= valores.rol === 'admin' ? 'selected' : '' %>>Administrador</option>
+        </select>
+        <div class="form-text" id="ayuda-rol">Los administradores pueden editar y eliminar a cualquier persona.</div>
+      </div>
+    <% } %>
+    <div class="col-12">
+      <label class="form-label" for="password"><%= persona ? 'Contraseña nueva' : 'Contraseña' %></label>
+      <div class="input-group">
+        <input class="form-control" id="password" type="password" name="password" minlength="6" autocomplete="new-password" aria-describedby="ayuda-password" <%= persona ? '' : 'required' %>>
+        <button class="btn btn-outline-secondary" type="button" data-mostrar-password="password" aria-pressed="false">Mostrar</button>
+        <% if (sesion.rol === 'admin') { %>
+          <button class="btn btn-outline-secondary" type="button" data-generar-password="password">Generar</button>
+        <% } %>
+      </div>
+      <div class="form-text" id="ayuda-password">
+        Mínimo 6 caracteres.<%= persona ? ' Déjala vacía para conservar la actual.' : '' %>
+        <% if (sesion.rol === 'admin') { %> «Generar» crea una contraseña temporal para que se la entregues a la persona.<% } %>
+      </div>
+    </div>
+  </div>
 
-  <label class="form-label" for="email">Email:</label>
-  <input class="form-control mb-2" id="email" type="email" name="email" value="<%= valores.email || '' %>" required>
-
-  <label class="form-label" for="edad">Edad:</label>
-  <input class="form-control mb-2" id="edad" type="number" name="edad" min="0" max="120" value="<%= valores.edad ?? '' %>" required>
-
-  <label class="form-label" for="password">Contraseña:</label>
-  <input class="form-control mb-1" id="password" type="password" name="password" minlength="6" <%= persona ? '' : 'required' %>>
-  <% if (persona) { %><div class="form-text mb-2">Déjala vacía para conservar la actual.</div><% } %>
-
-  <button class="btn btn-primary mt-2" type="submit">Guardar</button>
-  <a class="btn btn-secondary mt-2" href="/personas">Cancelar</a>
+  <div class="pie-formulario">
+    <button class="btn btn-primary" type="submit">Guardar persona</button>
+    <a class="btn btn-outline-secondary" href="/personas">Cancelar</a>
+  </div>
 </form>
 
 <%- include('../plantillas/footer') %>

@@ -1,0 +1,69 @@
+<%- include('../plantillas/header', { titulo: 'Carrito' }) %>
+<div class="encabezado entra">
+  <div>
+    <h1>Tu carrito</h1>
+    <p class="texto-suave"><%= articulos %> <%= articulos === 1 ? 'artículo' : 'artículos' %></p>
+  </div>
+</div>
+
+<% if (lineas.length === 0) { %>
+  <div class="vacio">
+    <p><strong>Tu carrito está vacío</strong></p>
+    <p>Agrega libros desde el catálogo para comprarlos.</p>
+    <a class="btn btn-primary" href="/">Ver libros</a>
+  </div>
+<% } else { %>
+  <div class="carrito entra entra--2">
+    <ul class="lineas" aria-label="Libros en tu carrito">
+      <% lineas.forEach((l) => { %>
+        <li class="linea">
+          <% if (l.libro.imagen) { %>
+            <img class="linea__portada" src="<%= l.libro.imagen %>" alt="" width="64" height="85">
+          <% } else { %>
+            <div class="linea__portada linea__portada--vacia" aria-hidden="true"></div>
+          <% } %>
+          <div class="linea__datos">
+            <h2 class="linea__titulo"><%= l.libro.titulo %></h2>
+            <p class="linea__autor"><%= l.libro.autor %></p>
+            <p class="linea__precio"><%= dineroCent(l.unitarioCent) %> c/u</p>
+          </div>
+          <form class="linea__cantidad" action="/carrito/actualizar" method="POST" data-enviando>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="libroId" value="<%= l.libro.id %>">
+            <label class="form-label" for="cant-<%= l.libro.id %>">Cantidad</label>
+            <div class="linea__cantidad-campos">
+              <input class="form-control" id="cant-<%= l.libro.id %>" name="cantidad" type="number" min="1" max="<%= maxPorLibro %>" step="1" value="<%= l.cantidad %>" inputmode="numeric" required aria-describedby="max-<%= l.libro.id %>">
+              <button class="btn btn-outline-primary" type="submit">Actualizar<span class="visually-hidden"> cantidad de «<%= l.libro.titulo %>»</span></button>
+            </div>
+            <p class="form-text mb-0" id="max-<%= l.libro.id %>">Máximo <%= maxPorLibro %></p>
+          </form>
+          <p class="linea__subtotal"><span class="visually-hidden">Subtotal: </span><%= dineroCent(l.subtotalCent) %></p>
+          <form class="linea__quitar" action="/carrito/quitar" method="POST" data-enviando>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="libroId" value="<%= l.libro.id %>">
+            <button class="btn btn-sm btn-outline-danger" type="submit">Quitar<span class="visually-hidden"> «<%= l.libro.titulo %>» del carrito</span></button>
+          </form>
+        </li>
+      <% }) %>
+    </ul>
+
+    <aside class="resumen" aria-labelledby="resumenTitulo">
+      <h2 id="resumenTitulo">Resumen</h2>
+      <dl class="resumen__lista">
+        <div><dt><%= articulos %> <%= articulos === 1 ? 'artículo' : 'artículos' %></dt><dd><%= dineroCent(totalCent) %></dd></div>
+        <div class="resumen__total"><dt>Total</dt><dd><%= dineroCent(totalCent) %></dd></div>
+      </dl>
+      <form action="/carrito/comprar" method="POST" data-enviando>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="totalCent" value="<%= totalCent %>">
+        <button class="btn btn-primary w-100" type="submit"><%= sesion ? 'Comprar ahora' : 'Iniciar sesión para comprar' %></button>
+      </form>
+      <% if (!sesion) { %><p class="form-text">Tu carrito se conserva al iniciar sesión o crear una cuenta.</p><% } %>
+      <form action="/carrito/vaciar" method="POST" data-enviando>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-link resumen__vaciar" type="submit">Vaciar carrito</button>
+      </form>
+    </aside>
+  </div>
+<% } %>
+<%- include('../plantillas/footer') %>

@@ -3,43 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema Librería</title>
-  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+  <title><%= typeof titulo !== 'undefined' && titulo ? titulo + ' · ' : '' %>FES Aragón</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/bootstrap/css/estilos.css">
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <a class="saltar" href="#main">Saltar al contenido</a>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary" aria-label="Principal">
     <div class="container-fluid">
       <a class="navbar-brand" href="/">FES ARAGÓN</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Menú">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal"
+              aria-controls="menuPrincipal" aria-expanded="false" aria-label="Mostrar u ocultar el menú">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="collapse navbar-collapse" id="menuPrincipal">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <% if (sesion) { %>
+          <li class="nav-item">
+            <a class="nav-link<%= rutaActual === '/' ? ' active' : '' %>" href="/"<%- rutaActual === '/' ? ' aria-current="page"' : '' %>>Libros</a>
+          </li>
+          <% if (sesion && sesion.rol === 'admin') { %>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <a class="nav-link dropdown-toggle<%= rutaActual.startsWith('/personas') ? ' active' : '' %>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Personas
               </a>
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="/personas">Lista</a></li>
                 <li><a class="dropdown-item" href="/personas/crear">Crear</a></li>
                 <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/personas#ventas">Libros y ventas</a></li>
               </ul>
             </li>
-          <% } else { %>
-            <li class="nav-item"><a class="nav-link" href="/login">Iniciar sesión</a></li>
-            <li class="nav-item"><a class="nav-link" href="/registro">Registrarme</a></li>
+          <% } else if (sesion) { %>
+            <li class="nav-item">
+              <a class="nav-link<%= rutaActual.startsWith('/personas') ? ' active' : '' %>" href="/personas"<%- rutaActual.startsWith('/personas') ? ' aria-current="page"' : '' %>>Mi cuenta</a>
+            </li>
           <% } %>
         </ul>
-        <% if (sesion) { %>
-          <form class="d-flex align-items-center gap-2 mb-0" action="/logout" method="POST">
-            <span class="navbar-text">Hola, <%= sesion.nombre %></span>
-            <button class="btn btn-outline-secondary btn-sm" type="submit">Cerrar sesión</button>
-          </form>
-        <% } %>
+        <ul class="navbar-nav align-items-lg-center gap-lg-2 mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link<%= rutaActual.startsWith('/carrito') ? ' active' : '' %>" href="/carrito"
+               aria-label="Carrito, <%= carritoCantidad %> <%= carritoCantidad === 1 ? 'artículo' : 'artículos' %>">
+              Carrito <span class="badge text-bg-primary" aria-hidden="true"><%= carritoCantidad %></span>
+            </a>
+          </li>
+          <% if (sesion) { %>
+            <li class="nav-item"><span class="navbar-text">Hola, <%= sesion.nombre %></span></li>
+            <li class="nav-item">
+              <form action="/logout" method="POST" class="m-0">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button class="btn btn-outline-secondary btn-sm" type="submit">Cerrar sesión</button>
+              </form>
+            </li>
+          <% } else { %>
+            <li class="nav-item"><a class="btn btn-outline-primary btn-sm" href="/login">Iniciar sesión</a></li>
+            <li class="nav-item"><a class="btn btn-primary btn-sm" href="/registro">Crear cuenta</a></li>
+          <% } %>
+        </ul>
       </div>
     </div>
   </nav>
-  <main class="container text-center shadow-lg p-3 mb-5 bg-body-tertiary rounded">
-  <% if (flash && flash.mensaje) { %><div class="alert alert-success"><%= flash.mensaje %></div><% } %>
-  <% if (flash && flash.error) { %><div class="alert alert-danger"><%= flash.error %></div><% } %>
+  <main id="main" class="container text-center shadow-lg p-3 mb-5 bg-body-tertiary rounded" tabindex="-1">
+    <div class="<%= typeof ancho !== 'undefined' && ancho ? 'panel--' + ancho + ' text-start' : '' %>">
+      <% if (flash && flash.mensaje) { %><div class="alert alert-success" role="status" tabindex="-1" data-enfocar><%= flash.mensaje %></div><% } %>
+      <% if (flash && flash.info) { %><div class="alert alert-info" role="status" tabindex="-1" data-enfocar><%= flash.info %></div><% } %>
+      <% if (flash && flash.error) { %><div class="alert alert-danger" role="alert" tabindex="-1" data-enfocar><%= flash.error %></div><% } %>

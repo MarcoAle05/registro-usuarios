@@ -34,6 +34,12 @@ const Persona = db.define(
         max: { args: [120], msg: 'La edad debe estar entre 0 y 120' },
       },
     },
+    // Permisos: solo un admin puede gestionar a otras personas
+    rol: {
+      type: DataTypes.ENUM('admin', 'usuario'),
+      allowNull: false,
+      defaultValue: 'usuario',
+    },
     // Contraseña (siempre se guarda encriptada con bcrypt)
     password: {
       type: DataTypes.STRING,

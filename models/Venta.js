@@ -14,6 +14,11 @@ const Venta = db.define(
       allowNull: false,
       defaultValue: 1,
     },
+    // Precio de cada ejemplar al momento de la compra (ventas antiguas: null)
+    precioUnitario: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+    },
     fecha: {
       type: DataTypes.DATE,
       allowNull: false,

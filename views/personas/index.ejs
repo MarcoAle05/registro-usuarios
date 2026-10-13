@@ -1,35 +1,178 @@
-<%- include('../plantillas/header') %>
-  <h1>Personas registradas</h1>
-  <p><a class="btn btn-primary" href="/personas/crear">Nueva persona</a></p>
+<%- include('../plantillas/header', { titulo: 'Personas' }) %>
+<%
+  const fecha = (d) => new Date(d).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+  const puede = (p) => sesion.rol === 'admin' || sesion.id === p.id;
+  const esAdmin = sesion.rol === 'admin';
+  const base = '/personas?' + (q ? 'q=' + encodeURIComponent(q) + '&' : '');
+  const restantes = total - personas.length;
+%>
+<h1><%= esAdmin ? 'Lista de Personas' : 'Mi cuenta' %></h1>
+<% if (esAdmin) { %>
+  <p class="text-body-secondary" role="status"><%= total %> <%= total === 1 ? 'persona registrada' : 'personas registradas' %><% if (q) { %> · resultados para «<%= q %>»<% } %></p>
+  <a class="btn btn-primary mb-3" href="/personas/crear">Nueva Persona</a>
+<% } %>
+
+<% if (esAdmin) { %>
+<form class="busqueda" action="/personas" method="GET" role="search">
+  <label class="visually-hidden" for="q">Buscar personas</label>
+  <input class="form-control" id="q" type="search" name="q" value="<%= q %>" placeholder="Nombre o correo" maxlength="100" autocomplete="off">
+  <button class="btn btn-outline-primary" type="submit">Buscar</button>
+  <% if (q) { %><a class="btn btn-link" href="/personas">Limpiar</a><% } %>
+</form>
+<% } %>
+
+<% if (personas.length === 0) { %>
+  <div class="vacio">
+    <% if (q) { %>
+      <p><strong>Sin resultados para «<%= q %>»</strong></p>
+      <p>Revisa la ortografía o prueba con menos palabras.</p>
+      <a class="btn btn-primary" href="/personas">Ver todas las personas</a>
+    <% } else { %>
+      <p><strong>Aún no hay personas registradas</strong></p>
+    <% } %>
+  </div>
+<% } else { %>
 
   <div class="table-responsive">
-    <table class="table table-striped align-middle">
+    <table class="table table-borderless table-hover align-middle tabla-ancha">
+      <caption class="visually-hidden"><%= esAdmin ? 'Personas registradas' : 'Tu cuenta' %></caption>
       <thead>
-        <tr><th>ID</th><th>Nombre</th><th>Apellido</th><th>Email</th><th>Edad</th><th>Ventas</th><th>Registrado</th><th>Acciones</th></tr>
+        <tr>
+          <th scope="col">ID</th><th scope="col">Nombre</th><th scope="col">Email</th><th scope="col">Ventas</th><th scope="col">Acciones</th>
+        </tr>
       </thead>
       <tbody>
-        <% personas.forEach(p => { %>
+        <% personas.forEach((p) => { %>
           <tr>
             <td><%= p.id %></td>
-            <td><%= p.nombre %></td>
-            <td><%= p.apellido %></td>
+            <td><%= p.nombre %> <%= p.apellido %><% if (p.rol === 'admin') { %> <span class="badge text-bg-secondary">Administrador</span><% } %></td>
             <td><%= p.email %></td>
-            <td><%= p.edad %></td>
             <td><%= p.venta.length %></td>
-            <td><%= new Date(p.createdAt).toLocaleString('es-MX') %></td>
-            <td>
-              <a class="btn btn-sm btn-warning" href="/personas/<%= p.id %>/editar">Editar</a>
-              <form class="d-inline" action="/personas/<%= p.id %>?_method=DELETE" method="POST"
-                    onsubmit="return confirm('¿Eliminar a <%= p.nombre %> <%= p.apellido %>?')">
-                <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
-              </form>
+            <td class="text-nowrap">
+              <% if (puede(p)) { %>
+                <a class="btn btn-sm btn-link" href="/personas/<%= p.id %>/editar">Editar<span class="visually-hidden"> a <%= p.nombre %> <%= p.apellido %></span></a>
+                <button class="btn btn-sm btn-link text-danger" type="button" data-bs-toggle="modal" data-bs-target="#modalEliminar"
+                        data-nombre="<%= p.nombre %> <%= p.apellido %>" data-action="/personas/<%= p.id %>?_method=DELETE">Eliminar<span class="visually-hidden"> a <%= p.nombre %> <%= p.apellido %></span></button>
+              <% } %>
             </td>
           </tr>
         <% }) %>
-        <% if (personas.length === 0) { %>
-          <tr><td colspan="8">No hay personas registradas</td></tr>
-        <% } %>
       </tbody>
     </table>
   </div>
+
+  <% if (esAdmin) { %>
+    <div class="mas" id="mas">
+      <p class="mas__estado" role="status">Mostrando <%= personas.length %> de <%= total %></p>
+      <% if (restantes > 0) { %>
+        <a class="btn btn-outline-primary" href="<%= base %>mostrar=<%= mostrar + paso %>#mas">Mostrar <%= Math.min(paso, restantes) %> más<span class="visually-hidden"> personas</span></a>
+      <% } %>
+      <% if (mostrar > paso) { %>
+        <a class="btn btn-link" href="<%= base %>mostrar=<%= paso %>#mas">Mostrar solo 10</a>
+      <% } %>
+    </div>
+  <% } %>
+<% } %>
+
+<section id="ventas" class="seccion" aria-labelledby="ventasTitulo">
+  <h2 id="ventasTitulo">Libros y ventas</h2>
+
+  <h3>Libros</h3>
+  <% if (libros.length === 0) { %>
+    <p class="texto-suave">Aún no hay libros registrados.</p>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="tabla">
+        <caption class="visually-hidden">Libros registrados</caption>
+        <thead><tr><th scope="col"><span class="visually-hidden">Portada</span></th><th scope="col">Título</th><th scope="col">Autor</th><th scope="col" class="num">Precio</th></tr></thead>
+        <tbody>
+          <% libros.forEach((l) => { %>
+            <tr>
+              <td class="portada-celda"><% if (l.imagen) { %><img class="portada" src="<%= l.imagen %>" alt="Portada de <%= l.titulo %>" width="48" height="62" loading="lazy"><% } %></td>
+              <td><%= l.titulo %></td><td><%= l.autor %></td><td class="num"><%= dinero(l.precio) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+  <% if (sesion.rol === 'admin') { %>
+    <form class="fila-formulario" action="/personas/libros" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div><label class="form-label" for="libroTitulo">Título</label><input class="form-control" id="libroTitulo" name="titulo" maxlength="255" required></div>
+      <div><label class="form-label" for="libroAutor">Autor</label><input class="form-control" id="libroAutor" name="autor" maxlength="255" required></div>
+      <div><label class="form-label" for="libroPrecio">Precio</label><input class="form-control" id="libroPrecio" name="precio" type="number" min="0.01" step="0.01" inputmode="decimal" required></div>
+      <div><button class="btn btn-outline-primary" type="submit">Agregar libro</button></div>
+    </form>
+  <% } %>
+
+  <h3>Ventas<%= sesion.rol === 'admin' ? ' recientes' : ' mías' %></h3>
+  <% if (ventas.length === 0) { %>
+    <p class="texto-suave">Aún no hay ventas registradas.</p>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="tabla">
+        <caption class="visually-hidden">Últimas ventas</caption>
+        <thead>
+          <tr><th scope="col">Fecha</th><th scope="col">Persona</th><th scope="col">Libro</th><th scope="col" class="num">Cant.</th><th scope="col" class="num">Total</th></tr>
+        </thead>
+        <tbody>
+          <% ventas.forEach((v) => { %>
+            <tr>
+              <td class="fecha"><%= fecha(v.fecha) %></td>
+              <td><%= v.persona.nombre %> <%= v.persona.apellido %></td>
+              <td><%= v.libro.titulo %></td>
+              <td class="num"><%= v.cantidad %></td>
+              <td class="num"><%= dinero(v.cantidad * Number(v.precioUnitario ?? v.libro.precio)) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+  <% if (sesion.rol === 'admin') { %>
+    <% if (libros.length === 0) { %>
+      <p class="ayuda">Agrega al menos un libro para poder registrar ventas.</p>
+    <% } else { %>
+      <form class="fila-formulario" action="/personas/ventas" method="POST">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div>
+          <label class="form-label" for="ventaPersona">Persona</label>
+          <select class="form-select" id="ventaPersona" name="personaId" required>
+            <option value="">Elige una persona</option>
+            <% todasPersonas.forEach((p) => { %><option value="<%= p.id %>"><%= p.nombre %> <%= p.apellido %></option><% }) %>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="ventaLibro">Libro</label>
+          <select class="form-select" id="ventaLibro" name="libroId" required>
+            <option value="">Elige un libro</option>
+            <% libros.forEach((l) => { %><option value="<%= l.id %>"><%= l.titulo %> — <%= dinero(l.precio) %></option><% }) %>
+          </select>
+        </div>
+        <div><label class="form-label" for="ventaCantidad">Cantidad</label><input class="form-control" id="ventaCantidad" name="cantidad" type="number" min="1" max="1000" step="1" value="1" required></div>
+        <div><button class="btn btn-primary" type="submit">Registrar venta</button></div>
+      </form>
+    <% } %>
+  <% } %>
+</section>
+
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarTitulo" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" method="POST" action="">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="modalEliminarTitulo">Eliminar persona</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Vas a eliminar a <strong id="modalEliminarNombre"></strong>. Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+      </div>
+    </form>
+  </div>
+</div>
 <%- include('../plantillas/footer') %>

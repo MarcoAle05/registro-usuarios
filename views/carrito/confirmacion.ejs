@@ -1,0 +1,40 @@
+<%- include('../plantillas/header', { titulo: 'Compra realizada' }) %>
+<div class="encabezado entra">
+  <div>
+    <h1>Compra realizada</h1>
+    <p class="texto-suave">Registrada el <%= fecha.toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' }) %></p>
+  </div>
+</div>
+
+<div class="table-responsive entra entra--2">
+  <table class="tabla">
+    <caption class="visually-hidden">Libros comprados</caption>
+    <thead>
+      <tr>
+        <th scope="col">Libro</th>
+        <th scope="col" class="num">Cant.</th>
+        <th scope="col" class="num">Precio</th>
+        <th scope="col" class="num">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% compra.lineas.forEach((l) => { %>
+        <tr>
+          <td><%= l.titulo %></td>
+          <td class="num"><%= l.cantidad %></td>
+          <td class="num"><%= dineroCent(l.unitarioCent) %></td>
+          <td class="num"><%= dineroCent(l.subtotalCent) %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+    <tfoot>
+      <tr><th scope="row" colspan="3" class="num">Total</th><td class="num"><strong><%= dineroCent(compra.totalCent) %></strong></td></tr>
+    </tfoot>
+  </table>
+</div>
+
+<div class="pie-formulario">
+  <a class="btn btn-primary" href="/">Seguir comprando</a>
+  <a class="btn btn-outline-primary" href="/personas#ventas">Ver mis ventas</a>
+</div>
+<%- include('../plantillas/footer') %>

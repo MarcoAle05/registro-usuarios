@@ -21,6 +21,11 @@ const Libro = db.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    // Ruta pública de la portada (opcional)
+    imagen: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     tableName: 'libro',
