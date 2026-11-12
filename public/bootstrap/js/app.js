@@ -60,3 +60,32 @@ document.querySelectorAll('form[data-enviando]').forEach((form) => {
     }
   });
 });
+
+// Imprimir el reporte (sin onclick en línea)
+document.querySelectorAll('[data-imprimir]').forEach((boton) => {
+  boton.addEventListener('click', () => window.print());
+});
+
+// Formulario de compra: muestra el total estimado (kilos del lote × precio final por kilo)
+const selectorLote = document.querySelector('[data-compra-lote]');
+const campoPrecio = document.querySelector('[data-compra-precio]');
+const campoTotal = document.querySelector('[data-compra-total]');
+if (campoPrecio && campoTotal) {
+  const kilosActuales = () => {
+    if (selectorLote) return Number(selectorLote.selectedOptions[0]?.dataset.kilos);
+    return Number(campoTotal.dataset.kilosInicial);
+  };
+  const recalcular = () => {
+    const total = kilosActuales() * Number(campoPrecio.value);
+    campoTotal.value = Number.isFinite(total) && total > 0
+      ? total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })
+      : '';
+  };
+  // Al elegir un lote, sugiere su precio de salida si todavía no hay precio final
+  selectorLote?.addEventListener('change', () => {
+    if (!campoPrecio.value) campoPrecio.value = selectorLote.selectedOptions[0]?.dataset.salida ?? '';
+    recalcular();
+  });
+  campoPrecio.addEventListener('input', recalcular);
+  if (selectorLote && campoPrecio.value) recalcular();
+}

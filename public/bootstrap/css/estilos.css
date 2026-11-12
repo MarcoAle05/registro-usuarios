@@ -199,3 +199,23 @@ main:focus { outline: none; }
 .table-responsive { text-align: center; }
 .tabla th, .tabla td { text-align: start; }
 .tabla .num { text-align: end; }
+
+
+/* ---------- Sistema Lonja ---------- */
+.panel--amplio { max-width: 72rem; margin-inline: auto; }
+.resumen { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.75rem; }
+.resumen__dato { background: var(--marca-suave); border-radius: 10px; padding: 0.875rem 1rem; text-align: left; display: flex; flex-direction: column; }
+.resumen__valor { font-size: 1.5rem; font-weight: 600; color: var(--marca); font-variant-numeric: tabular-nums; line-height: 1.2; overflow-wrap: anywhere; }
+.resumen__etiqueta { color: var(--tinta-suave); font-size: 0.875rem; }
+.accesos { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.estado { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 999px; }
+.estado--disponible { background: #dff3e4; color: #14532d; }
+.estado--comprado { background: #eceff3; color: #3b4757; }
+.tabla tfoot th, .tabla tfoot td { border-top: 2px solid var(--borde); border-bottom: 0; padding: 0.75rem; }
+.tabla tfoot th { text-align: left; font-size: 0.9375rem; color: var(--tinta); }
+
+@media print {
+  .navbar, footer, .no-imprimir, .saltar, .tabla__acciones { display: none !important; }
+  main { box-shadow: none !important; max-width: none !important; }
+  .panel--amplio { max-width: none; }
+}

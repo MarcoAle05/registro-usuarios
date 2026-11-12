@@ -1,0 +1,75 @@
+<%- include('../plantillas/header', { titulo, ancho: 'amplio' }) %>
+<h1>Reporte diario de compras</h1>
+<p class="texto-suave mb-3">Detalle de las compras efectuadas el <strong><%= fechaCorta(new Date(fecha + 'T12:00:00-06:00')) %></strong>.</p>
+
+<% if (fechaInvalida) { %><div class="alert alert-warning" role="alert">La fecha indicada no es válida; se muestra el día de hoy.</div><% } %>
+
+<form class="busqueda no-imprimir" action="/reporte" method="GET">
+  <label class="visually-hidden" for="fecha">Fecha del reporte</label>
+  <input class="form-control" id="fecha" type="date" name="fecha" value="<%= fecha %>" max="<%= hoy %>" required>
+  <button class="btn btn-primary" type="submit">Ver reporte</button>
+  <% if (fecha !== hoy) { %><a class="btn btn-link" href="/reporte">Hoy</a><% } %>
+  <button class="btn btn-outline-secondary" type="button" data-imprimir>Imprimir</button>
+</form>
+
+<div class="resumen" role="list">
+  <div class="resumen__dato" role="listitem"><span class="resumen__valor"><%= totales.compras %></span><span class="resumen__etiqueta">Compras</span></div>
+  <div class="resumen__dato" role="listitem"><span class="resumen__valor"><%= numero(totales.kilos) %></span><span class="resumen__etiqueta">Kilos</span></div>
+  <div class="resumen__dato" role="listitem"><span class="resumen__valor"><%= totales.cajas %></span><span class="resumen__etiqueta">Cajas</span></div>
+  <div class="resumen__dato" role="listitem"><span class="resumen__valor"><%= dinero(totales.importe) %></span><span class="resumen__etiqueta">Importe total</span></div>
+</div>
+
+<% if (compras.length === 0) { %>
+  <div class="vacio"><p><strong>No hay compras registradas en esta fecha</strong></p></div>
+<% } else { %>
+  <div class="table-responsive mt-4">
+    <table class="tabla">
+      <caption class="visually-hidden">Compras del día</caption>
+      <thead>
+        <tr>
+          <th scope="col">Hora</th><th scope="col">Lote</th><th scope="col">Especies</th><th scope="col">Comprador</th>
+          <th scope="col" class="num">Cajas</th><th scope="col" class="num">Kilos</th>
+          <th scope="col" class="num">Salida/kg</th><th scope="col" class="num">Final/kg</th><th scope="col" class="num">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% compras.forEach((c) => { %>
+          <tr>
+            <td class="fecha"><%= soloHora(c.fecha) %></td>
+            <td><%= c.id_cmp %></td>
+            <td><%= c.lote.especies.map((e) => e.nombre + (e.tipo ? ' (' + e.tipo.nombre + ')' : '')).join(', ') || '—' %></td>
+            <td><%= nombreComprador(c.comprador) %></td>
+            <td class="num"><%= c.lote.numero_cajas %></td>
+            <td class="num"><%= numero(c.lote.kilos) %></td>
+            <td class="num"><%= dinero(c.lote.precio_kilo_salida) %></td>
+            <td class="num"><%= dinero(c.precio_kilo_final) %></td>
+            <td class="num"><strong><%= dinero(c.precio_total) %></strong></td>
+          </tr>
+        <% }) %>
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row" colspan="4">Total del día</th>
+          <td class="num"><strong><%= totales.cajas %></strong></td>
+          <td class="num"><strong><%= numero(totales.kilos) %></strong></td>
+          <td></td><td></td>
+          <td class="num"><strong><%= dinero(totales.importe) %></strong></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <h2 class="h5 mt-4">Por comprador</h2>
+  <div class="table-responsive">
+    <table class="tabla">
+      <caption class="visually-hidden">Resumen por comprador</caption>
+      <thead><tr><th scope="col">Comprador</th><th scope="col" class="num">Compras</th><th scope="col" class="num">Kilos</th><th scope="col" class="num">Importe</th></tr></thead>
+      <tbody>
+        <% resumen.forEach((r) => { %>
+          <tr><td><%= r.nombre %></td><td class="num"><%= r.compras %></td><td class="num"><%= numero(r.kilos) %></td><td class="num"><%= dinero(r.importe) %></td></tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+<%- include('../plantillas/footer') %>

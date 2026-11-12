@@ -1,0 +1,20 @@
+<%- include('plantillas/header', { titulo: 'Inicio', ancho: 'amplio' }) %>
+<h1>Sistema Lonja</h1>
+<p class="texto-suave mb-4">Hola, <%= sesion.nombre %>. Resumen de hoy, <%= fechaCorta(new Date()) %>.</p>
+
+<div class="resumen" role="list">
+  <div class="resumen__dato" role="listitem"><span class="resumen__valor"><%= resumen.comprasHoy %></span><span class="resumen__etiqueta">Compras de hoy</span></div>
+  <div class="resumen__dato" role="listitem"><span class="resumen__valor"><%= dinero(resumen.importeHoy) %></span><span class="resumen__etiqueta">Importe de hoy</span></div>
+  <div class="resumen__dato" role="listitem"><span class="resumen__valor"><%= resumen.disponibles %></span><span class="resumen__etiqueta">Lotes disponibles</span></div>
+  <div class="resumen__dato" role="listitem"><span class="resumen__valor"><%= resumen.compradores %></span><span class="resumen__etiqueta">Compradores</span></div>
+</div>
+
+<h2 class="h5 mt-4 mb-3">¿Qué quieres hacer?</h2>
+<div class="accesos">
+  <a class="btn btn-primary" href="/compras/nuevo">Registrar compra</a>
+  <a class="btn btn-outline-primary" href="/lotes/nuevo">Registrar lote</a>
+  <a class="btn btn-outline-primary" href="/especies/nuevo">Agregar especie</a>
+  <a class="btn btn-outline-primary" href="/compradores/nuevo">Registrar comprador</a>
+  <a class="btn btn-outline-primary" href="/reporte">Ver reporte diario</a>
+</div>
+<%- include('plantillas/footer') %>

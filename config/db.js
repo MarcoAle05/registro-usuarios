@@ -7,6 +7,8 @@ const db = new Sequelize(process.env.BD_NOMBRE, process.env.BD_USUARIO, process.
   port: process.env.BD_PORT,
   dialect: process.env.BD_DIALEC,
   logging: false,
+  // Hora de Veracruz: así los días del reporte coinciden con los datos guardados
+  timezone: '-06:00',
   define: {
     timestamps: false,
     underscored: false,

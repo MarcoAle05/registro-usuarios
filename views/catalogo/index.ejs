@@ -1,0 +1,57 @@
+<%- include('../plantillas/header', { titulo, ancho: 'amplio' }) %>
+<%
+  const esAdmin = sesion.rol === 'admin';
+  const puedeEscribir = esAdmin || cat.escritura === 'todos';
+  const imagenOk = (r) => typeof r === 'string' && /^\/[A-Za-z0-9_\-./]+$/.test(r);
+%>
+<h1><%= cat.titulo %></h1>
+<p class="texto-suave mb-3"><%= cat.ayuda %></p>
+<p class="text-body-secondary" role="status"><%= filas.length %> <%= filas.length === 1 ? 'registro' : 'registros' %></p>
+<% if (puedeEscribir) { %><a class="btn btn-primary mb-3" href="/<%= clave %>/nuevo"><%= cat.nuevo %></a><% } %>
+
+<% if (filas.length === 0) { %>
+  <div class="vacio"><p><strong>Aún no hay registros</strong></p></div>
+<% } else { %>
+  <div class="table-responsive">
+    <table class="tabla">
+      <caption class="visually-hidden"><%= cat.titulo %></caption>
+      <thead>
+        <tr>
+          <% cat.columnas.forEach((c) => { %><th scope="col"<%- c.clase === 'num' ? ' class="num"' : '' %>><%= c.imagen ? '' : c.etiqueta %><% if (c.imagen) { %><span class="visually-hidden"><%= c.etiqueta %></span><% } %></th><% }) %>
+          <% if (puedeEscribir) { %><th scope="col"><span class="visually-hidden">Acciones</span></th><% } %>
+        </tr>
+      </thead>
+      <tbody>
+        <% filas.forEach((f) => { %>
+          <%
+            const id = f[cat.pk];
+            const bloqueo = cat.puedeEditar ? cat.puedeEditar(f) : null;
+          %>
+          <tr>
+            <% cat.columnas.forEach((c) => { %>
+              <% if (c.imagen) { %>
+                <td class="portada-celda"><% if (imagenOk(c.imagen(f))) { %><img class="portada" src="<%= c.imagen(f) %>" alt="" width="48" height="48" loading="lazy" data-ocultar-si-falla><% } %></td>
+              <% } else if (c.insignia) { %>
+                <td><span class="estado estado--<%= c.valor(f) === 'Comprado' ? 'comprado' : 'disponible' %>"><%= c.valor(f) %></span></td>
+              <% } else { %>
+                <td<%- c.clase ? ` class="${c.clase}"` : '' %>><%= c.valor(f) %></td>
+              <% } %>
+            <% }) %>
+            <% if (puedeEscribir) { %>
+              <td class="tabla__acciones">
+                <% if (!bloqueo) { %><a class="btn btn-sm btn-link" href="/<%= clave %>/<%= id %>/editar">Editar<span class="visually-hidden"> registro <%= id %></span></a><% } %>
+                <% if (esAdmin) { %>
+                  <button class="btn btn-sm btn-link text-danger" type="button" data-bs-toggle="modal" data-bs-target="#modalEliminar"
+                          data-nombre="<%= cat.singular %> <%= id %>" data-action="/<%= clave %>/<%= id %>?_method=DELETE">Eliminar<span class="visually-hidden"> registro <%= id %></span></button>
+                <% } %>
+              </td>
+            <% } %>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../plantillas/modal-eliminar') %>
+<%- include('../plantillas/footer') %>

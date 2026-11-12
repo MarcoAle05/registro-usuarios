@@ -1,0 +1,41 @@
+<%- include('../plantillas/header', { titulo, ancho: 'medio' }) %>
+<%
+  const action = fila ? `/${clave}/${fila[cat.pk]}?_method=PUT` : `/${clave}`;
+%>
+<h1><%= titulo %></h1>
+<p class="texto-suave mb-4"><%= fila ? 'Modifica los datos y guarda los cambios.' : 'Completa los datos del registro.' %></p>
+
+<% if (error) { %><div class="alert alert-danger" role="alert" tabindex="-1" data-enfocar><%= error %></div><% } %>
+
+<form action="<%= action %>" method="POST">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="row g-3">
+    <% campos.forEach((c) => { %>
+      <div class="col-12<%= c.col ? ' col-md-' + c.col : '' %>">
+        <label class="form-label" for="<%= c.nombre %>"><%= c.etiqueta %><%= c.requerido ? '' : ' (opcional)' %></label>
+        <% if (c.tipo === 'select') { %>
+          <select class="form-select" id="<%= c.nombre %>" name="<%= c.nombre %>" <%= c.requerido ? 'required' : '' %><%- c.ayuda ? ` aria-describedby="ayuda-${c.nombre}"` : '' %>>
+            <option value="">Elige una opción</option>
+            <% c.lista.forEach((o) => { %><option value="<%= o.valor %>" <%= String(valores[c.nombre] ?? '') === String(o.valor) ? 'selected' : '' %>><%= o.texto %></option><% }) %>
+          </select>
+        <% } else { %>
+          <input class="form-control" id="<%= c.nombre %>" name="<%= c.nombre %>"
+                 type="<%= c.tipo === 'datetime' ? 'datetime-local' : c.tipo %>"
+                 value="<%= valores[c.nombre] ?? '' %>"
+                 <%- c.max ? `maxlength="${c.max}"` : '' %>
+                 <%- c.min ? `min="${c.min}"` : '' %>
+                 <%- c.paso ? `step="${c.paso}"` : '' %>
+                 <%- c.tipo === 'number' ? 'inputmode="decimal"' : '' %>
+                 <%- c.ayuda ? `aria-describedby="ayuda-${c.nombre}"` : '' %>
+                 <%= c.requerido ? 'required' : '' %>>
+        <% } %>
+        <% if (c.ayuda) { %><div class="form-text" id="ayuda-<%= c.nombre %>"><%= c.ayuda %></div><% } %>
+      </div>
+    <% }) %>
+  </div>
+  <div class="pie-formulario">
+    <button class="btn btn-primary" type="submit">Guardar</button>
+    <a class="btn btn-outline-secondary" href="/<%= clave %>">Cancelar</a>
+  </div>
+</form>
+<%- include('../plantillas/footer') %>

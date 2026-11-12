@@ -2,7 +2,8 @@ import express from 'express';
 import session from 'express-session';
 import helmet from 'helmet';
 import methodOverride from 'method-override';
-import router from './routes/inicio_router.js';
+import usuarios from './routes/usuarios_router.js';
+import lonja from './routes/lonja_router.js';
 import auth from './routes/auth_router.js';
 import { contexto, requiereLogin } from './middleware/auth.js';
 import { valoresPorDefecto, soloTextos, csrf } from './middleware/base.js';
@@ -10,9 +11,7 @@ import db from './config/db.js';
 import './models/index.js';
 import dotenv from 'dotenv';
 import path from 'path';
-import carrito from './routes/carrito_router.js';
-import { contadorCarrito } from './utils/carrito.js';
-import { sembrarLibros } from './utils/semilla.js';
+import { sembrarDatos } from './utils/semilla.js';
 const __dirname = path.resolve();
 
 dotenv.config({ path: '.env' });
@@ -77,12 +76,11 @@ app.use(
 );
 app.use(contexto);
 app.use(csrf);
-app.use(contadorCarrito);
 
 // Routing
-app.use('/personas', requiereLogin, router);
-app.use('/carrito', carrito);
+app.use('/usuarios', requiereLogin, usuarios);
 app.use('/', auth);
+app.use('/', lonja);
 
 // 404
 app.use((req, res) => {
@@ -96,7 +94,7 @@ app.use((err, req, res, next) => {
   // Formulario caducado (sesión vencida): volver al inicio con un aviso, sin página 403
   if (err.csrf) {
     req.session.flash = { error: 'El formulario caducó. Vuelve a intentarlo.' };
-    return res.redirect(req.usuario ? '/personas' : '/login');
+    return res.redirect(req.usuario ? '/' : '/login');
   }
   const status = err.status >= 400 && err.status < 500 ? err.status : 500;
   const titulo =
@@ -130,7 +128,7 @@ const port = 2800;
     await db.sync(); // crea las tablas que falten (los datos existentes no se tocan)
     console.log('Modelos sincronizados.');
 
-    await sembrarLibros();
+    await sembrarDatos();
 
     app.listen(port, () => {
       console.log(`Esperando peticiones en el puerto ${port}`);

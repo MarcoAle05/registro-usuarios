@@ -1,0 +1,50 @@
+<%- include('../plantillas/header', { titulo, ancho: 'medio' }) %>
+<%
+  const action = compra ? `/compras/${compra.id_cmp}?_method=PUT` : '/compras';
+%>
+<h1><%= titulo %></h1>
+<p class="texto-suave mb-4"><%= compra ? 'El lote no cambia; puedes corregir el comprador y el precio final.' : 'Elige el lote, quién lo compra y el precio final por kilo. El total se calcula solo.' %></p>
+
+<% if (error) { %><div class="alert alert-danger" role="alert" tabindex="-1" data-enfocar><%= error %></div><% } %>
+
+<form action="<%= action %>" method="POST">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="row g-3">
+    <div class="col-12">
+      <label class="form-label" for="id_cmp">Lote</label>
+      <% if (compra) { %>
+        <input class="form-control" id="id_cmp" type="text" value="<%= lotes.find((l) => l.valor === compra.id_cmp)?.texto ?? 'Lote ' + compra.id_cmp %>" disabled>
+      <% } else { %>
+        <select class="form-select" id="id_cmp" name="id_cmp" required data-compra-lote>
+          <option value="">Elige un lote disponible</option>
+          <% lotes.forEach((l) => { %>
+            <option value="<%= l.valor %>" data-kilos="<%= l.kilos %>" data-salida="<%= l.salida %>" <%= String(valores.lote) === String(l.valor) ? 'selected' : '' %>><%= l.texto %></option>
+          <% }) %>
+        </select>
+      <% } %>
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="codigo_cpr">Comprador</label>
+      <select class="form-select" id="codigo_cpr" name="codigo_cpr" required>
+        <option value="">Elige un comprador</option>
+        <% compradores.forEach((c) => { %><option value="<%= c.valor %>" <%= String(valores.comprador) === String(c.valor) ? 'selected' : '' %>><%= c.texto %></option><% }) %>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="precio_kilo_final">Precio final por kilo</label>
+      <input class="form-control" id="precio_kilo_final" name="precio_kilo_final" type="number" min="0.01" step="0.01" inputmode="decimal" required
+             value="<%= valores.precio ?? '' %>" data-compra-precio>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="total_estimado">Total</label>
+      <input class="form-control" id="total_estimado" type="text" readonly data-compra-total
+             value="<%= compra ? dinero(compra.precio_total) : '' %>" data-kilos-inicial="<%= compra ? Number(compra.lote.kilos) : '' %>">
+      <div class="form-text">Kilos × precio final por kilo.</div>
+    </div>
+  </div>
+  <div class="pie-formulario">
+    <button class="btn btn-primary" type="submit">Guardar compra</button>
+    <a class="btn btn-outline-secondary" href="/compras">Cancelar</a>
+  </div>
+</form>
+<%- include('../plantillas/footer') %>

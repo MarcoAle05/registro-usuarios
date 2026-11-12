@@ -1,6 +1,6 @@
 <%- include('../plantillas/header', { titulo: 'Iniciar sesión', ancho: 'estrecho' }) %>
   <h1>Iniciar sesión</h1>
-  <p class="texto-suave mb-4">Entra para consultar y administrar el registro de personas.</p>
+  <p class="texto-suave mb-4">Acceso exclusivo para el personal autorizado de la Lonja de Veracruz.</p>
 
   <% if (error) { %><div class="alert alert-danger" role="alert" tabindex="-1" data-enfocar><%= error %></div><% } %>
 
@@ -19,5 +19,7 @@
     <button class="btn btn-primary w-100" type="submit">Iniciar sesión</button>
   </form>
 
-  <p class="enlaces-formulario">¿No tienes cuenta? <a href="/registro">Crea una</a></p>
+  <% if (primerUso) { %>
+    <p class="enlaces-formulario">Primer uso del sistema: <a href="/registro">crea la cuenta de administrador</a></p>
+  <% } %>
 <%- include('../plantillas/footer') %>

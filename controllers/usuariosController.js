@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { Op, Sequelize } from 'sequelize';
 import db from '../config/db.js';
-import { Libro, Persona, Venta } from '../models/index.js';
+import { Persona } from '../models/index.js';
 import { mensajeError } from '../utils/errores.js';
 
 // Nunca se envía el hash de la contraseña a las vistas
@@ -64,37 +64,19 @@ const inicio = async (req, res) => {
   const personas = await Persona.findAll({
     where,
     attributes: SIN_PASSWORD,
-    // Ventas de cada persona (alias "venta"); solo se necesita contarlas
-    include: [{ model: Venta, as: 'venta', attributes: ['id', 'personaId'], separate: true }],
     order: orden,
     limit: mostrar,
   });
 
-  // Libros y ventas de la página principal: un usuario solo ve sus propias ventas
-  const [libros, ventas, todasPersonas] = await Promise.all([
-    Libro.findAll({ order: [['titulo', 'ASC']] }),
-    Venta.findAll({
-      where: esAdmin(req) ? {} : { personaId: req.usuario.id },
-      include: [
-        { model: Persona, as: 'persona', attributes: ['id', 'nombre', 'apellido'] },
-        { model: Libro, as: 'libro', attributes: ['id', 'titulo', 'precio'] },
-      ],
-      order: [['id', 'DESC']],
-      limit: 10,
-    }),
-    esAdmin(req)
-      ? Persona.findAll({ attributes: ['id', 'nombre', 'apellido'], order: [['nombre', 'ASC']] })
-      : [],
-  ]);
-  res.render('personas/index.ejs', { personas, total, q, mostrar, paso: POR_PAGINA, libros, ventas, todasPersonas });
+  res.render('usuarios/index.ejs', { personas, total, q, mostrar, paso: POR_PAGINA });
 };
 
 // FORMULARIO CREAR
 const verCrear = (req, res) => {
-  res.render('personas/formulario.ejs', {
+  res.render('usuarios/formulario.ejs', {
     persona: null,
     valores: {},
-    action: '/personas/registrar',
+    action: '/usuarios/registrar',
     method: 'POST',
     error: null,
   });
@@ -105,10 +87,10 @@ const registro = async (req, res) => {
   const valores = leerCampos(req.body);
   const { password } = req.body;
   const fallo = (error, status = 400) =>
-    res.status(status).render('personas/formulario.ejs', {
+    res.status(status).render('usuarios/formulario.ejs', {
       persona: null,
       valores,
-      action: '/personas/registrar',
+      action: '/usuarios/registrar',
       method: 'POST',
       error,
     });
@@ -128,8 +110,8 @@ const registro = async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
     const rol = ROLES.includes(req.body.rol) ? req.body.rol : 'usuario';
     await Persona.create({ ...valores, password: passwordHash, rol });
-    req.session.flash = { mensaje: 'Persona registrada con éxito' };
-    res.redirect('/personas');
+    req.session.flash = { mensaje: 'Usuario registrado con éxito' };
+    res.redirect('/usuarios');
   } catch (err) {
     fallo(mensajeError(err).texto);
   }
@@ -139,13 +121,13 @@ const registro = async (req, res) => {
 const editar = async (req, res) => {
   const persona = await Persona.findByPk(req.params.id, { attributes: SIN_PASSWORD });
   if (!persona) {
-    req.session.flash = { error: 'La persona no existe' };
-    return res.redirect('/personas');
+    req.session.flash = { error: 'El usuario no existe' };
+    return res.redirect('/usuarios');
   }
-  res.render('personas/formulario.ejs', {
+  res.render('usuarios/formulario.ejs', {
     persona,
     valores: persona.toJSON(),
-    action: `/personas/${persona.id}?_method=PUT`,
+    action: `/usuarios/${persona.id}?_method=PUT`,
     method: 'POST',
     error: null,
   });
@@ -155,17 +137,17 @@ const editar = async (req, res) => {
 const actualizar = async (req, res) => {
   const persona = await Persona.findByPk(req.params.id, { attributes: SIN_PASSWORD });
   if (!persona) {
-    req.session.flash = { error: 'La persona no existe' };
-    return res.redirect('/personas');
+    req.session.flash = { error: 'El usuario no existe' };
+    return res.redirect('/usuarios');
   }
 
   const valores = leerCampos(req.body);
   const { password } = req.body;
   const fallo = (error, status = 400) =>
-    res.status(status).render('personas/formulario.ejs', {
+    res.status(status).render('usuarios/formulario.ejs', {
       persona,
       valores: { ...valores, id: persona.id },
-      action: `/personas/${persona.id}?_method=PUT`,
+      action: `/usuarios/${persona.id}?_method=PUT`,
       method: 'POST',
       error,
     });
@@ -196,8 +178,8 @@ const actualizar = async (req, res) => {
       cambios.rol = req.body.rol;
     }
     await persona.update(cambios);
-    req.session.flash = { mensaje: 'Persona actualizada con éxito' };
-    res.redirect('/personas');
+    req.session.flash = { mensaje: 'Usuario actualizado con éxito' };
+    res.redirect('/usuarios');
   } catch (err) {
     fallo(mensajeError(err).texto);
   }
@@ -207,27 +189,21 @@ const actualizar = async (req, res) => {
 const eliminar = async (req, res) => {
   const persona = await Persona.findByPk(req.params.id, { attributes: ['id', 'rol'] });
   if (!persona) {
-    req.session.flash = { error: 'La persona no existe' };
-    return res.redirect('/personas');
+    req.session.flash = { error: 'El usuario no existe' };
+    return res.redirect('/usuarios');
   }
   if (await esUnicoAdmin(persona)) {
     req.session.flash = { error: 'No puedes eliminar al único administrador' };
-    return res.redirect('/personas');
+    return res.redirect('/usuarios');
   }
-  try {
-    await persona.destroy();
-  } catch (err) {
-    if (err.name !== 'SequelizeForeignKeyConstraintError') throw err;
-    req.session.flash = { error: 'No se puede eliminar: la persona tiene ventas registradas' };
-    return res.redirect('/personas');
-  }
+  await persona.destroy();
 
   // Si se eliminó a sí mismo, la sesión ya no tiene sentido
   if (req.usuario.id === persona.id) {
     return req.session.destroy(() => res.redirect('/login'));
   }
-  req.session.flash = { mensaje: 'Persona eliminada con éxito' };
-  res.redirect('/personas');
+  req.session.flash = { mensaje: 'Usuario eliminado con éxito' };
+  res.redirect('/usuarios');
 };
 
 export { inicio, verCrear, registro, editar, actualizar, eliminar };

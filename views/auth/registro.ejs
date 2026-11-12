@@ -1,6 +1,6 @@
-<%- include('../plantillas/header', { titulo: 'Crear cuenta', ancho: 'estrecho' }) %>
-  <h1>Crear cuenta</h1>
-  <p class="texto-suave mb-4">Con tu cuenta podrás consultar el registro de personas y editar tus propios datos.</p>
+<%- include('../plantillas/header', { titulo: 'Cuenta de administrador', ancho: 'estrecho' }) %>
+  <h1>Cuenta de administrador</h1>
+  <p class="texto-suave mb-4">Primer uso del sistema: esta cuenta tendrá rol de administrador y podrá dar de alta al resto del personal.</p>
 
   <% if (error) { %>
     <div class="alert alert-danger" role="alert" tabindex="-1" data-enfocar><%= error %>
@@ -36,7 +36,7 @@
     </div>
     <div class="form-text mb-4" id="ayuda-password">Mínimo 6 caracteres.</div>
 
-    <button class="btn btn-primary w-100" type="submit">Crear cuenta</button>
+    <button class="btn btn-primary w-100" type="submit">Crear cuenta de administrador</button>
   </form>
 
   <p class="enlaces-formulario">¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></p>

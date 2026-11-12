@@ -1,6 +1,6 @@
-<%- include('../plantillas/header', { titulo: persona ? 'Editar persona' : 'Nueva persona', ancho: 'medio' }) %>
-<h1><%= persona ? 'Editar persona' : 'Nueva persona' %></h1>
-<p class="texto-suave mb-4"><%= persona ? 'Modifica los datos y guarda los cambios.' : 'Completa los datos para registrar a la persona.' %></p>
+<%- include('../plantillas/header', { titulo: persona ? 'Editar usuario' : 'Nuevo usuario', ancho: 'medio' }) %>
+<h1><%= persona ? 'Editar usuario' : 'Nuevo usuario' %></h1>
+<p class="texto-suave mb-4"><%= persona ? 'Modifica los datos y guarda los cambios.' : 'Completa los datos para dar de alta al usuario.' %></p>
 
 <% if (typeof error !== 'undefined' && error) { %>
   <div class="alert alert-danger" role="alert" tabindex="-1" data-enfocar><%= error %></div>
@@ -30,10 +30,10 @@
       <div class="col-md-8">
         <label class="form-label" for="rol">Rol</label>
         <select class="form-select" id="rol" name="rol" aria-describedby="ayuda-rol">
-          <option value="usuario" <%= (valores.rol || 'usuario') === 'usuario' ? 'selected' : '' %>>Usuario</option>
+          <option value="usuario" <%= (valores.rol || 'usuario') === 'usuario' ? 'selected' : '' %>>Capturista</option>
           <option value="admin" <%= valores.rol === 'admin' ? 'selected' : '' %>>Administrador</option>
         </select>
-        <div class="form-text" id="ayuda-rol">Los administradores pueden editar y eliminar a cualquier persona.</div>
+        <div class="form-text" id="ayuda-rol">Los administradores gestionan catálogos, usuarios y pueden eliminar registros; los capturistas registran lotes, compradores y compras.</div>
       </div>
     <% } %>
     <div class="col-12">
@@ -47,14 +47,14 @@
       </div>
       <div class="form-text" id="ayuda-password">
         Mínimo 6 caracteres.<%= persona ? ' Déjala vacía para conservar la actual.' : '' %>
-        <% if (sesion.rol === 'admin') { %> «Generar» crea una contraseña temporal para que se la entregues a la persona.<% } %>
+        <% if (sesion.rol === 'admin') { %> «Generar» crea una contraseña temporal para que se la entregues al usuario.<% } %>
       </div>
     </div>
   </div>
 
   <div class="pie-formulario">
-    <button class="btn btn-primary" type="submit">Guardar persona</button>
-    <a class="btn btn-outline-secondary" href="/personas">Cancelar</a>
+    <button class="btn btn-primary" type="submit">Guardar usuario</button>
+    <a class="btn btn-outline-secondary" href="/usuarios">Cancelar</a>
   </div>
 </form>
 

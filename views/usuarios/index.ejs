@@ -1,0 +1,94 @@
+<%- include('../plantillas/header', { titulo: 'Usuarios' }) %>
+<%
+    const puede = (p) => sesion.rol === 'admin' || sesion.id === p.id;
+  const esAdmin = sesion.rol === 'admin';
+  const base = '/usuarios?' + (q ? 'q=' + encodeURIComponent(q) + '&' : '');
+  const restantes = total - personas.length;
+%>
+<h1><%= esAdmin ? 'Usuarios del sistema' : 'Mi cuenta' %></h1>
+<% if (esAdmin) { %>
+  <p class="text-body-secondary" role="status"><%= total %> <%= total === 1 ? 'usuario registrado' : 'usuarios registrados' %><% if (q) { %> · resultados para «<%= q %>»<% } %></p>
+  <a class="btn btn-primary mb-3" href="/usuarios/crear">Nuevo usuario</a>
+<% } %>
+
+<% if (esAdmin) { %>
+<form class="busqueda" action="/usuarios" method="GET" role="search">
+  <label class="visually-hidden" for="q">Buscar usuarios</label>
+  <input class="form-control" id="q" type="search" name="q" value="<%= q %>" placeholder="Nombre o correo" maxlength="100" autocomplete="off">
+  <button class="btn btn-outline-primary" type="submit">Buscar</button>
+  <% if (q) { %><a class="btn btn-link" href="/usuarios">Limpiar</a><% } %>
+</form>
+<% } %>
+
+<% if (personas.length === 0) { %>
+  <div class="vacio">
+    <% if (q) { %>
+      <p><strong>Sin resultados para «<%= q %>»</strong></p>
+      <p>Revisa la ortografía o prueba con menos palabras.</p>
+      <a class="btn btn-primary" href="/usuarios">Ver todos los usuarios</a>
+    <% } else { %>
+      <p><strong>Aún no hay usuarios registrados</strong></p>
+    <% } %>
+  </div>
+<% } else { %>
+
+  <div class="table-responsive">
+    <table class="table table-borderless table-hover align-middle tabla-ancha">
+      <caption class="visually-hidden"><%= esAdmin ? 'Usuarios registrados' : 'Tu cuenta' %></caption>
+      <thead>
+        <tr>
+          <th scope="col">ID</th><th scope="col">Nombre</th><th scope="col">Correo</th><th scope="col">Rol</th><th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% personas.forEach((p) => { %>
+          <tr>
+            <td><%= p.id %></td>
+            <td><%= p.nombre %> <%= p.apellido %><% if (p.rol === 'admin') { %> <span class="badge text-bg-secondary">Administrador</span><% } %></td>
+            <td><%= p.email %></td>
+            <td><%= p.rol === 'admin' ? 'Administrador' : 'Capturista' %></td>
+            <td class="text-nowrap">
+              <% if (puede(p)) { %>
+                <a class="btn btn-sm btn-link" href="/usuarios/<%= p.id %>/editar">Editar<span class="visually-hidden"> a <%= p.nombre %> <%= p.apellido %></span></a>
+                <button class="btn btn-sm btn-link text-danger" type="button" data-bs-toggle="modal" data-bs-target="#modalEliminar"
+                        data-nombre="<%= p.nombre %> <%= p.apellido %>" data-action="/usuarios/<%= p.id %>?_method=DELETE">Eliminar<span class="visually-hidden"> a <%= p.nombre %> <%= p.apellido %></span></button>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (esAdmin) { %>
+    <div class="mas" id="mas">
+      <p class="mas__estado" role="status">Mostrando <%= personas.length %> de <%= total %></p>
+      <% if (restantes > 0) { %>
+        <a class="btn btn-outline-primary" href="<%= base %>mostrar=<%= mostrar + paso %>#mas">Mostrar <%= Math.min(paso, restantes) %> más<span class="visually-hidden"> usuarios</span></a>
+      <% } %>
+      <% if (mostrar > paso) { %>
+        <a class="btn btn-link" href="<%= base %>mostrar=<%= paso %>#mas">Mostrar solo 10</a>
+      <% } %>
+    </div>
+  <% } %>
+<% } %>
+
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarTitulo" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" method="POST" action="">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="modalEliminarTitulo">Eliminar usuario</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Vas a eliminar a <strong id="modalEliminarNombre"></strong>. Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+      </div>
+    </form>
+  </div>
+</div>
+<%- include('../plantillas/footer') %>

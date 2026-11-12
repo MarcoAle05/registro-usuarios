@@ -24,7 +24,7 @@ export const contexto = async (req, res, next) => {
 
 const denegar = (req, res) => {
   req.session.flash = { error: 'No tienes permiso para hacer eso' };
-  res.status(403).redirect('/personas');
+  res.status(403).redirect('/');
 };
 
 // Solo deja pasar a quien ya inició sesión
@@ -38,7 +38,7 @@ export const requiereLogin = (req, res, next) => {
 
 // Si ya inició sesión, no tiene sentido mostrar registro/login
 export const soloInvitados = (req, res, next) => {
-  if (req.usuario) return res.redirect('/personas');
+  if (req.usuario) return res.redirect('/');
   next();
 };
 

@@ -6,8 +6,7 @@ import {
   editar,
   actualizar,
   eliminar,
-} from '../controllers/inicioController.js';
-import { crearLibro, crearVenta } from '../controllers/ventasController.js';
+} from '../controllers/usuariosController.js';
 import { soloAdmin, adminOPropio } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -15,16 +14,14 @@ const router = express.Router();
 // El :id solo puede ser un número
 router.param('id', (req, res, next, id) => {
   if (!/^\d{1,10}$/.test(id)) {
-    req.session.flash = { error: 'La persona no existe' };
-    return res.redirect('/personas');
+    req.session.flash = { error: 'El usuario no existe' };
+    return res.redirect('/usuarios');
   }
   next();
 });
 
 //Routing
 router.get('/', inicio);
-router.post('/libros', soloAdmin, crearLibro);
-router.post('/ventas', soloAdmin, crearVenta);
 router.get('/crear', soloAdmin, verCrear);
 router.post('/registrar', soloAdmin, registro);
 router.get('/:id/editar', adminOPropio, editar);

@@ -1,30 +1,26 @@
-import { Libro } from '../models/index.js';
+import { Tipo, Comprador } from '../models/index.js';
 
-// Libros predeterminados: solo se cargan cuando la tabla está vacía.
-// Los precios son de ejemplo; se pueden cambiar directamente en la base de datos.
-const LIBROS = [
+// Datos iniciales: solo se cargan cuando las tablas están vacías.
+const TIPOS = ['Pescado', 'Marisco', 'Molusco'];
+
+const COMPRADORES = [
   {
-    titulo: 'Algoritmos Java',
-    autor: 'Autor no especificado',
-    precio: 350,
-    imagen: '/bootstrap/img/libro_1.jpg',
+    nombre: 'Rosa', apellido_paterno: 'Hernández', apellido_materno: 'Cruz',
+    direccion: 'Av. Díaz Mirón 120, Veracruz, Ver.', correo: 'rosa.hernandez@example.com',
   },
   {
-    titulo: 'Curso de programación Java',
-    autor: 'Mariona Nadal Farré',
-    precio: 420,
-    imagen: '/bootstrap/img/libro_2.jpg',
-  },
-  {
-    titulo: 'Programación en Java 6',
-    autor: 'Luis Joyanes Aguilar e Ignacio Zahonero Martínez',
-    precio: 580,
-    imagen: '/bootstrap/img/libro_3.jpg',
+    nombre: 'Carlos', apellido_paterno: 'Domínguez', apellido_materno: 'Ríos',
+    direccion: 'Calle Hidalgo 45, Boca del Río, Ver.', correo: 'carlos.dominguez@example.com',
   },
 ];
 
-export const sembrarLibros = async () => {
-  if ((await Libro.count()) > 0) return;
-  await Libro.bulkCreate(LIBROS);
-  console.log('Libros predeterminados cargados.');
+export const sembrarDatos = async () => {
+  if ((await Tipo.count()) === 0) {
+    await Tipo.bulkCreate(TIPOS.map((nombre) => ({ nombre })));
+    console.log('Tipos predeterminados cargados.');
+  }
+  if ((await Comprador.count()) === 0) {
+    await Comprador.bulkCreate(COMPRADORES);
+    console.log('Compradores de ejemplo cargados.');
+  }
 };

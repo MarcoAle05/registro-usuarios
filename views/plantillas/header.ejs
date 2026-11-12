@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= typeof titulo !== 'undefined' && titulo ? titulo + ' · ' : '' %>FES Aragón</title>
+  <title><%= typeof titulo !== 'undefined' && titulo ? titulo + ' · ' : '' %>Lonja de Veracruz</title>
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="/bootstrap/css/estilos.css">
 </head>
@@ -11,41 +11,36 @@
   <a class="saltar" href="#main">Saltar al contenido</a>
   <nav class="navbar navbar-expand-lg bg-body-tertiary" aria-label="Principal">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/">FES ARAGÓN</a>
+      <a class="navbar-brand" href="/">LONJA DE VERACRUZ</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal"
               aria-controls="menuPrincipal" aria-expanded="false" aria-label="Mostrar u ocultar el menú">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="menuPrincipal">
+        <% if (sesion) { %>
+        <%
+          const activo = (...rutas) => rutas.some((r) => (r === '/' ? rutaActual === '/' : rutaActual.startsWith(r)));
+          const enlace = (href, texto) => `<a class="nav-link${activo(href) ? ' active' : ''}" href="${href}"${activo(href) ? ' aria-current="page"' : ''}>${texto}</a>`;
+        %>
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link<%= rutaActual === '/' ? ' active' : '' %>" href="/"<%- rutaActual === '/' ? ' aria-current="page"' : '' %>>Libros</a>
+          <li class="nav-item"><%- enlace('/', 'Inicio') %></li>
+          <li class="nav-item"><%- enlace('/compras', 'Compras') %></li>
+          <li class="nav-item"><%- enlace('/lotes', 'Lotes') %></li>
+          <li class="nav-item"><%- enlace('/reporte', 'Reporte diario') %></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle<%= activo('/especies', '/tipos', '/compradores') ? ' active' : '' %>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Catálogos</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/especies">Especies</a></li>
+              <li><a class="dropdown-item" href="/tipos">Tipos</a></li>
+              <li><a class="dropdown-item" href="/compradores">Compradores</a></li>
+            </ul>
           </li>
-          <% if (sesion && sesion.rol === 'admin') { %>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle<%= rutaActual.startsWith('/personas') ? ' active' : '' %>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Personas
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="/personas">Lista</a></li>
-                <li><a class="dropdown-item" href="/personas/crear">Crear</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="/personas#ventas">Libros y ventas</a></li>
-              </ul>
-            </li>
-          <% } else if (sesion) { %>
-            <li class="nav-item">
-              <a class="nav-link<%= rutaActual.startsWith('/personas') ? ' active' : '' %>" href="/personas"<%- rutaActual.startsWith('/personas') ? ' aria-current="page"' : '' %>>Mi cuenta</a>
-            </li>
-          <% } %>
+          <li class="nav-item"><%- enlace('/usuarios', sesion.rol === 'admin' ? 'Usuarios' : 'Mi cuenta') %></li>
         </ul>
+        <% } else { %>
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+        <% } %>
         <ul class="navbar-nav align-items-lg-center gap-lg-2 mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link<%= rutaActual.startsWith('/carrito') ? ' active' : '' %>" href="/carrito"
-               aria-label="Carrito, <%= carritoCantidad %> <%= carritoCantidad === 1 ? 'artículo' : 'artículos' %>">
-              Carrito <span class="badge text-bg-primary" aria-hidden="true"><%= carritoCantidad %></span>
-            </a>
-          </li>
           <% if (sesion) { %>
             <li class="nav-item"><span class="navbar-text">Hola, <%= sesion.nombre %></span></li>
             <li class="nav-item">
@@ -55,8 +50,7 @@
               </form>
             </li>
           <% } else { %>
-            <li class="nav-item"><a class="btn btn-outline-primary btn-sm" href="/login">Iniciar sesión</a></li>
-            <li class="nav-item"><a class="btn btn-primary btn-sm" href="/registro">Crear cuenta</a></li>
+            <li class="nav-item"><a class="btn btn-primary btn-sm" href="/login">Iniciar sesión</a></li>
           <% } %>
         </ul>
       </div>

@@ -1,0 +1,45 @@
+<%- include('../plantillas/header', { titulo, ancho: 'amplio' }) %>
+<% const esAdmin = sesion.rol === 'admin'; %>
+<h1>Compras</h1>
+<p class="texto-suave mb-3">Últimas compras registradas. Cada compra corresponde a un lote.</p>
+<p class="text-body-secondary" role="status"><%= compras.length %> <%= compras.length === 1 ? 'compra' : 'compras' %></p>
+<a class="btn btn-primary mb-3" href="/compras/nuevo">Nueva compra</a>
+
+<% if (compras.length === 0) { %>
+  <div class="vacio"><p><strong>Aún no hay compras registradas</strong></p></div>
+<% } else { %>
+  <div class="table-responsive">
+    <table class="tabla">
+      <caption class="visually-hidden">Compras registradas</caption>
+      <thead>
+        <tr>
+          <th scope="col">Fecha</th><th scope="col">Lote</th><th scope="col">Especies</th><th scope="col">Comprador</th>
+          <th scope="col" class="num">Kilos</th><th scope="col" class="num">Precio/kg</th><th scope="col" class="num">Total</th>
+          <th scope="col"><span class="visually-hidden">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% compras.forEach((c) => { %>
+          <tr>
+            <td class="fecha"><%= fechaHora(c.fecha) %></td>
+            <td><%= c.id_cmp %></td>
+            <td><%= c.lote.especies.map((e) => e.nombre).join(', ') || '—' %></td>
+            <td><%= nombreComprador(c.comprador) %></td>
+            <td class="num"><%= numero(c.lote.kilos) %></td>
+            <td class="num"><%= dinero(c.precio_kilo_final) %></td>
+            <td class="num"><strong><%= dinero(c.precio_total) %></strong></td>
+            <td class="tabla__acciones">
+              <a class="btn btn-sm btn-link" href="/compras/<%= c.id_cmp %>/editar">Editar<span class="visually-hidden"> compra del lote <%= c.id_cmp %></span></a>
+              <% if (esAdmin) { %>
+                <button class="btn btn-sm btn-link text-danger" type="button" data-bs-toggle="modal" data-bs-target="#modalEliminar"
+                        data-nombre="compra del lote <%= c.id_cmp %>" data-action="/compras/<%= c.id_cmp %>?_method=DELETE">Eliminar<span class="visually-hidden"> compra del lote <%= c.id_cmp %></span></button>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+<%- include('../plantillas/modal-eliminar') %>
+<%- include('../plantillas/footer') %>

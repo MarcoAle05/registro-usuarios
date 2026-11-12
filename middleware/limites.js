@@ -11,6 +11,7 @@ export const limiteLogin = rateLimit({
     res.status(429).render('auth/login.ejs', {
       error: 'Demasiados intentos fallidos. Espera 15 minutos e intenta de nuevo',
       email: '',
+      primerUso: false,
     }),
 });
 

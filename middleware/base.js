@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { fechaCorta, fechaHora, soloHora } from '../utils/fechas.js';
 
 // Valores por defecto para las vistas. Van PRIMERO, así hasta las páginas de
 // error (que pueden ocurrir antes que la sesión) tienen todo lo que usa el header.
@@ -7,10 +8,13 @@ export const valoresPorDefecto = (req, res, next) => {
   res.locals.flash = {};
   res.locals.csrfToken = '';
   res.locals.rutaActual = req.path;
-  res.locals.carritoCantidad = 0;
   res.locals.dinero = (pesos) =>
     Number(pesos).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
-  res.locals.dineroCent = (centavos) => res.locals.dinero(centavos / 100);
+  res.locals.numero = (n, decimales = 2) =>
+    Number(n).toLocaleString('es-MX', { minimumFractionDigits: decimales, maximumFractionDigits: decimales });
+  res.locals.fechaCorta = fechaCorta;
+  res.locals.fechaHora = fechaHora;
+  res.locals.soloHora = soloHora;
   next();
 };
 
